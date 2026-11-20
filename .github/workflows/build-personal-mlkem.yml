@@ -1,0 +1,17 @@
+  linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '~1.25.9'
+      - name: Build
+        run: |
+          TAGS=$(cat release/DEFAULT_BUILD_TAGS)
+          CGO_ENABLED=0 go build -trimpath \
+            -ldflags "-s -w -X github.com/sagernet/sing-box/constant.Version=1.13.8-mlkem" \
+            -tags "$TAGS" -o sing-box ./cmd/sing-box
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sing-box-1.13.8-mlkem-linux-amd64
+          path: sing-box

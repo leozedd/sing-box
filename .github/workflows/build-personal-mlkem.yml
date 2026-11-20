@@ -107,3 +107,32 @@ jobs:
         with:
           name: sing-box-1.13.8-mlkem-windows-amd64
           path: dist/windows-amd64/
+
+  linux-amd64:
+    runs-on: ubuntu-24.04
+    env:
+      CGO_ENABLED: "0"
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "~1.25.9"
+
+      - name: Build full-feature linux/amd64 core
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/linux-amd64
+          tags="$(tr -d '\r\n' < release/DEFAULT_BUILD_TAGS | tr ',' '\n' | grep -v '^with_naive_outbound$' | paste -sd, -)"
+          echo "tags=$tags"
+          flags="$(tr -d '\r\n' < release/LDFLAGS) -s -w -buildid= -X github.com/sagernet/sing-box/constant.Version=${VERSION}"
+          GOOS=linux GOARCH=amd64 GOAMD64=v1 go build -mod=readonly -trimpath \
+            -tags "$tags" -ldflags "$flags" -o dist/linux-amd64/sing-box ./cmd/sing-box
+          ls -lh dist/linux-amd64/sing-box
+
+      - name: Upload linux amd64 core
+        uses: actions/upload-artifact@v4
+        with:
+          name: sing-box-1.13.8-mlkem-linux-amd64
+          path: dist/linux-amd64/sing-box

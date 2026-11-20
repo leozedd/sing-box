@@ -1,3 +1,13 @@
+name: Build 1.13.8 REALITY MLKEM
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - testing
+      - fix/reality-mlkem-v1.13.8
+
+jobs:
   linux-amd64:
     runs-on: ubuntu-latest
     steps:
@@ -11,6 +21,8 @@
           CGO_ENABLED=0 go build -trimpath \
             -ldflags "-s -w -X github.com/sagernet/sing-box/constant.Version=1.13.8-mlkem" \
             -tags "$TAGS" -o sing-box ./cmd/sing-box
+      - name: Verify
+        run: file sing-box && ls -lh sing-box
       - uses: actions/upload-artifact@v4
         with:
           name: sing-box-1.13.8-mlkem-linux-amd64
